@@ -4,7 +4,7 @@
   "metadata": {
     "colab": {
       "provenance": [],
-      "authorship_tag": "ABX9TyNxQNIe72QTNRpr1vFbtB4k",
+      "authorship_tag": "ABX9TyMLVEaq04AiqiXJ1k8aK8tg",
       "include_colab_link": true
     },
     "kernelspec": {
@@ -23,7 +23,7 @@
         "colab_type": "text"
       },
       "source": [
-        "<a href=\"https://colab.research.google.com/github/rahcoderepo/NLP/blob/main/RAH-Assignments/RAH_NLP_Assignment_2.ipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+        "<a href=\"https://colab.research.google.com/github/rahcoderepo/NLP/blob/main/RAH-Assignments\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
       ]
     },
     {
@@ -55,6 +55,46 @@
     {
       "cell_type": "markdown",
       "source": [
+        "## Loading huggingface token\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "FIL49MOtlHGc"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# token name: CAI2300C-20241108-Class\n",
+        "# token value: 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 (copy and paste below when prompted)\n",
+        "# Note: having the token value defeats the purpose of the getpass, but it is added because in\n",
+        "#       real life situations that is how you protect your token and you will not include the\n",
+        "#       token value a spart of your code\n",
+        "\n",
+        "from getpass import getpass\n",
+        "HUGGINGFACE_TOKEN = getpass(\"Enter your Hugging Face token:\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "xjfNuLYylQrG",
+        "outputId": "d546f497-cfd9-4e47-a427-6d923db9a6f9"
+      },
+      "execution_count": 10,
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "Enter your Hugging Face token:··········\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
         "# loading libraries / importing packages"
       ],
       "metadata": {
@@ -70,7 +110,10 @@
         "    \"numpy\": \"numpy\",\n",
         "    \"pandas\": \"pandas\",\n",
         "    \"matplotlib\": \"matplotlib\",\n",
-        "    \"sklearn\": \"scikit-learn\"\n",
+        "    \"sklearn\": \"scikit-learn\",\n",
+        "    \"transformers4450\": \"transformers>=4.45.0\",\n",
+        "    \"pillow\": \"pillow\",\n",
+        "    \"Pytorch\": \"torch torchvision torchaudio\"\n",
         "}\n",
         "\n",
         "# Install only missing libraries\n",
@@ -87,19 +130,39 @@
           "base_uri": "https://localhost:8080/"
         },
         "id": "JTiu7d_PLVDH",
-        "outputId": "3887dc59-00cb-483c-ea82-2b7b48f43b8e"
+        "outputId": "99776cad-76dd-4380-f320-fcc46c915b23"
       },
-      "execution_count": 1,
+      "execution_count": 11,
       "outputs": [
         {
-          "output_type": "stream",
+          "metadata": {
+            "tags": null
+          },
           "name": "stdout",
+          "output_type": "stream",
           "text": [
             "tensorflow is already installed.\n",
             "numpy is already installed.\n",
             "pandas is already installed.\n",
             "matplotlib is already installed.\n",
-            "sklearn is already installed.\n"
+            "sklearn is already installed.\n",
+            "transformers4450 is not installed. Installing now...\n",
+            "pillow is not installed. Installing now...\n",
+            "Requirement already satisfied: pillow in /usr/local/lib/python3.10/dist-packages (11.0.0)\n",
+            "Pytorch is not installed. Installing now...\n",
+            "Requirement already satisfied: torch in /usr/local/lib/python3.10/dist-packages (2.5.1+cu121)\n",
+            "Requirement already satisfied: torchvision in /usr/local/lib/python3.10/dist-packages (0.20.1+cu121)\n",
+            "Requirement already satisfied: torchaudio in /usr/local/lib/python3.10/dist-packages (2.5.1+cu121)\n",
+            "Requirement already satisfied: filelock in /usr/local/lib/python3.10/dist-packages (from torch) (3.16.1)\n",
+            "Requirement already satisfied: typing-extensions>=4.8.0 in /usr/local/lib/python3.10/dist-packages (from torch) (4.12.2)\n",
+            "Requirement already satisfied: networkx in /usr/local/lib/python3.10/dist-packages (from torch) (3.4.2)\n",
+            "Requirement already satisfied: jinja2 in /usr/local/lib/python3.10/dist-packages (from torch) (3.1.4)\n",
+            "Requirement already satisfied: fsspec in /usr/local/lib/python3.10/dist-packages (from torch) (2024.10.0)\n",
+            "Requirement already satisfied: sympy==1.13.1 in /usr/local/lib/python3.10/dist-packages (from torch) (1.13.1)\n",
+            "Requirement already satisfied: mpmath<1.4,>=1.1.0 in /usr/local/lib/python3.10/dist-packages (from sympy==1.13.1->torch) (1.3.0)\n",
+            "Requirement already satisfied: numpy in /usr/local/lib/python3.10/dist-packages (from torchvision) (1.26.4)\n",
+            "Requirement already satisfied: pillow!=8.3.*,>=5.3.0 in /usr/local/lib/python3.10/dist-packages (from torchvision) (11.0.0)\n",
+            "Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.10/dist-packages (from jinja2->torch) (3.0.2)\n"
           ]
         }
       ]
@@ -112,18 +175,21 @@
         "import numpy as np\n",
         "import pandas as pd\n",
         "import matplotlib.pyplot as plt\n",
-        "import sklearn\n"
+        "import sklearn\n",
+        "from transformers import pipeline\n",
+        "import torch\n"
       ],
       "metadata": {
         "id": "DC2FJ36bLfh2"
       },
-      "execution_count": 2,
+      "execution_count": 13,
       "outputs": []
     },
     {
       "cell_type": "markdown",
       "source": [
-        "# Loading the Dataset"
+        "# Loading the Dataset\n",
+        "(Must define which dataset to load, default is dataset #1 which is RAH reduced size IMDb movie reviews dataset from Kaggle saved to RAH GitHub)\n"
       ],
       "metadata": {
         "id": "gorIQPSFMNrw"
@@ -132,15 +198,52 @@
     {
       "cell_type": "code",
       "source": [
-        "# Load the dataset from RAH GitHub (Smaller Set to meet GitHub limit of 25 MB)\n",
-        "df = pd.read_csv('https://raw.githubusercontent.com/rahcoderepo/NLP/refs/heads/main/DataSets/IMDB%20Dataset-GitHub-Ready-Less-Record.csv')\n",
-        "\n"
+        "\n",
+        "\n",
+        "# Dictionary to store dataset URLs\n",
+        "dataset_urls = {\n",
+        "    1: 'https://raw.githubusercontent.com/rahcoderepo/NLP/refs/heads/main/DataSets/IMDB%20Dataset-GitHub-Ready-Less-Record.csv',\n",
+        "    2: '',  # Example dataset\n",
+        "    3: ''  # Example dataset\n",
+        "}\n",
+        "\n",
+        "# Function to get dataset URL based on input number\n",
+        "def get_dataset_url(dataset_number):\n",
+        "    return dataset_urls.get(dataset_number, None)\n",
+        "\n",
+        "# Choose which dataset to load - see legend below\n",
+        "# 1 - dataset from RAH GitHub (Smaller Set to meet GitHub limit of 25 MB)\n",
+        "# 2 - # another dataset\n",
+        "# 3 - # another dataset\n",
+        "dataset_number = 1  # Replace with the dataset you want to load (1, 2, 3, etc.)\n",
+        "\n",
+        "# Call get_dataset_url function\n",
+        "selected_url = get_dataset_url(dataset_number)\n",
+        "\n",
+        "if selected_url:\n",
+        "    # Load the dataset\n",
+        "    df = pd.read_csv(selected_url)\n",
+        "    print(f\"Dataset {dataset_number} loaded successfully!\")\n",
+        "else:\n",
+        "    print(f\"Dataset {dataset_number} does not exist.\")\n"
       ],
       "metadata": {
-        "id": "4J34CuECMSdB"
+        "id": "4J34CuECMSdB",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "f77dc715-8294-43a6-e893-d185018935c2"
       },
-      "execution_count": 7,
-      "outputs": []
+      "execution_count": 19,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Dataset 1 loaded successfully!\n"
+          ]
+        }
+      ]
     },
     {
       "cell_type": "code",
@@ -154,24 +257,24 @@
           "height": 206
         },
         "id": "H0FMe5lRA_ey",
-        "outputId": "94df60cd-e5d4-4438-9420-dc8c26b33a70"
+        "outputId": "0cf1c993-724f-4c4b-d725-2c94dedd0ddb"
       },
-      "execution_count": 10,
+      "execution_count": 20,
       "outputs": [
         {
           "output_type": "execute_result",
           "data": {
             "text/plain": [
               "                                                  review sentiment\n",
-              "1975   As an avid Gone With the Wind fan, I was disap...  negative\n",
-              "10238  David Burton(Richard Chamberlain, quite good)i...  positive\n",
-              "3939   Warning: Spoilers Galore!<br /><br />Tim Burto...  negative\n",
-              "7393   This movie is perfect for families to watch to...  positive\n",
-              "14769  I truly love horror films & try to give every ...  negative"
+              "8951   This is one of the worst films ever. I like ch...  negative\n",
+              "13018  A dreamy, stunningly atmospheric film takes pl...  positive\n",
+              "9391   \"Nicodemus\" is almost a copy of \"Red\" in the o...  negative\n",
+              "2097   If you like bad movies (and you must to watch ...  negative\n",
+              "5122   This movie has such inexorable B class cheapne...  negative"
             ],
             "text/html": [
               "\n",
-              "  <div id=\"df-e3283d64-7fbf-4110-b350-0339feb5575c\" class=\"colab-df-container\">\n",
+              "  <div id=\"df-58a71c90-e98b-43e5-b5bf-494c809fb017\" class=\"colab-df-container\">\n",
               "    <div>\n",
               "<style scoped>\n",
               "    .dataframe tbody tr th:only-of-type {\n",
@@ -196,28 +299,28 @@
               "  </thead>\n",
               "  <tbody>\n",
               "    <tr>\n",
-              "      <th>1975</th>\n",
-              "      <td>As an avid Gone With the Wind fan, I was disap...</td>\n",
+              "      <th>8951</th>\n",
+              "      <td>This is one of the worst films ever. I like ch...</td>\n",
               "      <td>negative</td>\n",
               "    </tr>\n",
               "    <tr>\n",
-              "      <th>10238</th>\n",
-              "      <td>David Burton(Richard Chamberlain, quite good)i...</td>\n",
+              "      <th>13018</th>\n",
+              "      <td>A dreamy, stunningly atmospheric film takes pl...</td>\n",
               "      <td>positive</td>\n",
               "    </tr>\n",
               "    <tr>\n",
-              "      <th>3939</th>\n",
-              "      <td>Warning: Spoilers Galore!&lt;br /&gt;&lt;br /&gt;Tim Burto...</td>\n",
+              "      <th>9391</th>\n",
+              "      <td>\"Nicodemus\" is almost a copy of \"Red\" in the o...</td>\n",
               "      <td>negative</td>\n",
               "    </tr>\n",
               "    <tr>\n",
-              "      <th>7393</th>\n",
-              "      <td>This movie is perfect for families to watch to...</td>\n",
-              "      <td>positive</td>\n",
+              "      <th>2097</th>\n",
+              "      <td>If you like bad movies (and you must to watch ...</td>\n",
+              "      <td>negative</td>\n",
               "    </tr>\n",
               "    <tr>\n",
-              "      <th>14769</th>\n",
-              "      <td>I truly love horror films &amp; try to give every ...</td>\n",
+              "      <th>5122</th>\n",
+              "      <td>This movie has such inexorable B class cheapne...</td>\n",
               "      <td>negative</td>\n",
               "    </tr>\n",
               "  </tbody>\n",
@@ -226,7 +329,7 @@
               "    <div class=\"colab-df-buttons\">\n",
               "\n",
               "  <div class=\"colab-df-container\">\n",
-              "    <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-e3283d64-7fbf-4110-b350-0339feb5575c')\"\n",
+              "    <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-58a71c90-e98b-43e5-b5bf-494c809fb017')\"\n",
               "            title=\"Convert this dataframe to an interactive table.\"\n",
               "            style=\"display:none;\">\n",
               "\n",
@@ -278,12 +381,12 @@
               "\n",
               "    <script>\n",
               "      const buttonEl =\n",
-              "        document.querySelector('#df-e3283d64-7fbf-4110-b350-0339feb5575c button.colab-df-convert');\n",
+              "        document.querySelector('#df-58a71c90-e98b-43e5-b5bf-494c809fb017 button.colab-df-convert');\n",
               "      buttonEl.style.display =\n",
               "        google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
               "\n",
               "      async function convertToInteractive(key) {\n",
-              "        const element = document.querySelector('#df-e3283d64-7fbf-4110-b350-0339feb5575c');\n",
+              "        const element = document.querySelector('#df-58a71c90-e98b-43e5-b5bf-494c809fb017');\n",
               "        const dataTable =\n",
               "          await google.colab.kernel.invokeFunction('convertToInteractive',\n",
               "                                                    [key], {});\n",
@@ -303,8 +406,8 @@
               "  </div>\n",
               "\n",
               "\n",
-              "<div id=\"df-2a022ca6-678d-4def-b686-234ffa4a12af\">\n",
-              "  <button class=\"colab-df-quickchart\" onclick=\"quickchart('df-2a022ca6-678d-4def-b686-234ffa4a12af')\"\n",
+              "<div id=\"df-c3117731-201d-42e5-a0b5-badc5402c721\">\n",
+              "  <button class=\"colab-df-quickchart\" onclick=\"quickchart('df-c3117731-201d-42e5-a0b5-badc5402c721')\"\n",
               "            title=\"Suggest charts\"\n",
               "            style=\"display:none;\">\n",
               "\n",
@@ -423,7 +526,7 @@
               "    }\n",
               "    (() => {\n",
               "      let quickchartButtonEl =\n",
-              "        document.querySelector('#df-2a022ca6-678d-4def-b686-234ffa4a12af button');\n",
+              "        document.querySelector('#df-c3117731-201d-42e5-a0b5-badc5402c721 button');\n",
               "      quickchartButtonEl.style.display =\n",
               "        google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
               "    })();\n",
@@ -435,13 +538,22 @@
             ],
             "application/vnd.google.colaboratory.intrinsic+json": {
               "type": "dataframe",
-              "summary": "{\n  \"name\": \"df\",\n  \"rows\": 5,\n  \"fields\": [\n    {\n      \"column\": \"review\",\n      \"properties\": {\n        \"dtype\": \"string\",\n        \"num_unique_values\": 5,\n        \"samples\": [\n          \"David Burton(Richard Chamberlain, quite good)is a lawyer, more adept at handling corporate taxation(..and suffers from unusual dreams which bother him seeing this aboriginal man shrouded in darkness), who is called on to take a case concerning a group of aboriginals charged with the murder of one of their own named Billy..we see that he tries to steal stones with ritual painting on them and is killed when a leader of an aboriginal tribe named Charlie(Nandjiwarra Amagula)uses a \\\"death bone\\\" to stop his heart. Meanwhile, revolving around David, bizarre weather patterns effect Sydney such as rain beating down polluted dirt and rock-sized hail during bright blue skies(with no sights of clouds, such as the one that hits a school in central Australia), not to mention, a \\\"deformed\\\" rainbow which is split(!)into groups. As David pursues the case he finds that he is far closer to the weird events taking place than he could ever realize. One aboriginal named Chris(David Gulpilil)appears to him in a dream holding a stone with blood and he finds that this man is one of those he is to represent at trial! He finds that it's quite possible, after some strange meetings with Charlie and conversations with Chris, that he very well might be linked to a spirit named Mulkurul and that his dreams are actual premonitions of possible horrors yet to come.<br /><br />Absorbing apocalyptic drama builds it's story methodically and is completely original and unpredictable. With Peter Weir in charge, the film is visually arresting as we see these very overwhelming images of possible doom towards civilization, but the film's most compelling angle is certainly David's journey to find that monumental truth that plagues him as he questions Charlie and Chris countlessly, at first to help his men get off from a crime they didn't commit, and ultimately to find out what he has to do with anything catastrophic that is occurring or might occur later.\",\n          \"I truly love horror films & try to give every one I see as much credit (or sometimes more) as possible, but this is really pushing the ticket...most of the cast were very like-able but hardly any of them could act at all - but then again think about the writing/dialogue of this mess...some good make-up but absolutely ridiculous special fx. All in all I give it 3 out of 10 - & am having second thoughts about that!!\",\n          \"Warning: Spoilers Galore!<br /><br />Tim Burton remaking this sui generis movie is about as sensible as remaking Psycho - oh, that's right, some idiot already did that - I rest my case.<br /><br />Movie opens with chimpnaut blundering a simulation, proving he's not that smart from the outset. Marky Mark appears in shot without his characteristic underpants showing, then is turned down by a plain woman who prefers the touch of chimpanzees.<br /><br />The perfunctory establishing shot of the space station orbiting Saturn for no apparent reason, interior of ship a-bustle with genetic experiments on apes. Must we travel 1,300 million kilometers to Saturn to conduct these experiments? The special effects team decrees it.<br /><br />Marky's chimp gets lost in that staple of 60s sci-fi cinema - the Time Warp. Marky then demonstrates the space station's mind-boggling security ineptness by stealing a pod without anyone noticing, while simultaneously demonstrating his abject stupidity in mounting a deep-space rescue mission into a worm-hole for an expendable test chimp, with a million dollar vehicle with limited fuel and oxygen supplies.<br /><br />Before anyone can say `Pointless Remake' Marky has surfed the worm-hole, crashed on an alien planet, removed his helmet without any thought to the lethality of the atmosphere and is being chased through a sound stage that almost resembles a lush rainforest, if it weren't for the kliegs backlighting the plastic trees.<br /><br />Surprise! It's APES doing the chasing - or at least, it *would* have been a surprise if no one saw Planet Of The Apes THIRTY-THREE YEARS AGO.<br /><br />Since Marky Mark did not get to show his pecs, take down his pants, or bust his lame whiteboy rap, he was characterless. Michael Clarke Duncan's gorilla teeth being inserted crookedly helped immensely in establishing *his* lack of character. Helena Bonham-Carter (aka irritating chimp activist), at a loss without a Shakespearean script, did a fine job of outdoing both Marky and Clarke as Most Cardboard Cutout. Paul Giamatti, the orangutan slave trader, secured the role of token comic relief and interspecies klutz. Though I have grown bilious in hearing puns relating to this movie, one review headline captured the essence of this Planet Of The Apes `re-imagining': `The Apes Of Roth'. While everyone else minced about looking like extras from One Million Years BC or Greystoke, Tim Roth, as Chimpanzee Thade, chews massive amounts of scenery and hurls kaka splendiferously. As entertaining as his portrayal of the psychotic Thade was, his character lacked a behavioral arc: Thade is mad when we first meet him... and he's pretty much at the same level of mad at film's end. Nice twist.<br /><br />The original POTA (1968) featured a leading character, Charlton Heston's Taylor, who was so disenchanted with mankind that he left earth for space with no regrets - yet as that film progressed, Taylor unwittingly found himself locked in a battle to prove mankind's worth - as their sole champion! The original film was ultimately a tale of humiliation, not salvation: when Taylor discovers the Statue of Liberty, he is forced to realize that his species had NOT prevailed. Is there anything that cerebral or ironic to Marky Mark's Leo? Or Roth's Thade? No, but there's lots of running.<br /><br />The slogans cry: Take Back The Planet .but it's the APES' planet. In this movie, humans and apes crash-landed here together, the humans having degenerated to cavepeople, allowing the apes to acquire speech and sensual body armor; the apes DESERVED to inherit the planet! Along comes Marky Mark, in true anthropocentric arrogance, taking it for granted that humans HAVE to be the apex predators, simply because they're there. `Taking it back' is as ludicrous as apes landing here in 2001, complaining, `A planet where men evolved from APES??!!' and then causing trouble with their overacting and hairy anuses.<br /><br />Heston was cast in the 1968 POTA because he had established his reputation as a maverick: he WAS Ben-Hur, Michelangelo, Moses! To cast him as the mute, dogged animal in an alien society was to stupefy an audience's expectations: how crazed must a world be where Our Man Charlton cannot command respect? Marky Mark has currently only established that he has tight underpants.<br /><br />Though Heston was denigrated constantly by the ape council, he dominated the screen with his charisma and stupendous overacting. When Marky Mark tries to instill fervor in the mongoloid humans, it's like that unpopular guy in school suddenly being made classroom monitor, who tells you to stop drawing penises on the blackboard and you throw a shoe at him. Burton tries to elevate Marky to humanity's icon, but he comes off as a chittering deviant. In the original film, the apes deem Taylor a deviant, yet he was, to audience and apes alike, an icon of humanity. That irony again.<br /><br />It was apt that a man who elevated scene-chewing to an acting technique - Heston - should play the father of this film's primo scene-chewer, Thaddeus Roth. As Roth's ape-dad, Charlton utters his own immortal lines, turned against the HUMANS this time, `Damn them! Damn them all to hell!'<br /><br />The movie gets dumb and dumber towards the end. While Thaddeus is giving Marky an ass-beating lesson, a pod descends from on high with Marky's chimpnaut in it. Apes demonstrate their hebetude by bowing in obeisance to this incognizant creature, while Marky proves his own hebetude by muttering, `Let's teach these monkeys about evolution.' Firstly, they're not monkeys, you ape! Secondly, it was genetic tampering and imbecilic plot fabrications which brought the apes to this point, not evolution. And what you intend to teach them by blowing them away with the concealed lasergun is called misanthropy, not evolution.<br /><br />Giving away the twist ending would only confuse viewers into believing that Estella Warren's half-nekkid role was actually integral to the plot (be still my pants.).<br /><br />No matter that he was humankind's last underpanted hope; in the end, cop apes take Marky away to Plot Point Prison where he was last heard ululating, `It's a madhouse! A MADHOUSE!!...'\"\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"sentiment\",\n      \"properties\": {\n        \"dtype\": \"category\",\n        \"num_unique_values\": 2,\n        \"samples\": [\n          \"positive\",\n          \"negative\"\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    }\n  ]\n}"
+              "summary": "{\n  \"name\": \"df\",\n  \"rows\": 5,\n  \"fields\": [\n    {\n      \"column\": \"review\",\n      \"properties\": {\n        \"dtype\": \"string\",\n        \"num_unique_values\": 5,\n        \"samples\": [\n          \"A dreamy, stunningly atmospheric film takes place in a small town of Northfork, Montana in 1955. The government officials arrive to evacuate the town about to be inundated by a new hydroelctrical dam. There are the other visitors in the town, the angels from another time but they only seen by a dying boy Irvin. A local priest (Nick Nolte in a quiet heartbreaking performance) takes care of the boy. Irvin pleads with the angels to leave the place with them...<br /><br />There is some unearthly quality in the film, some dignified mourning and sublime sadness when you suddenly realize the inevitable finality of everything - humans and their relationships, cities, countries, civilizations, the whole world as we know it. Death and birth have something in common - we go through them in the ultimate loneliness. <br /><br />I cannot recall the film that affected me in the same way and as deeply as \\\"Northfork\\\" did, the film so beautiful and so tender, so quiet and so powerful, so heartbreaking and so moving. Even now, after several weeks since I saw it, tears come to my eyes when I only think of it.<br /><br />After I saw it, I had to talk to somebody about it. I sent a PM to one of my friends and I asked, \\\"Please tell me what I just saw?\\\" And my friend replied with the words, \\\"You just saw one of the greatest films of modern times. One of these days others will see the light.\\\"\",\n          \"This movie has such inexorable B class cheapness to all its scenes, effects etc as to make you think they spent 80% of their budget on Connery. It's like watching some Wing Commander stuff after Star Wars (quite apart from content).<br /><br />Story can be described in one word: FLAT. And oh my God I can't remember a villain so uninteresting since long long ago. We're given neither a reason he's so wicked (an inborn defect, we're lead to think:) nor any real convincedness or flair to his wickedness.<br /><br />If you're out for Connery rather go rent `Hunting Forrester'.\",\n          \"\\\"Nicodemus\\\" is almost a copy of \\\"Red\\\" in the odd behavior sense, but this episode focuses on other people in Clark Kent's unpredictable life. When a poisonous flower finds it's way into Smallville Jonathan Kent is the first to be effected by it. the flower causes people to reverse their behavior and when it effects Jonathan, he becomes short tempered and violent, however Clark manages to stop him from doing anything rash until his father finally passes out. okay. so far, so good. next up is Lana. the Episode was good up to that point, for the flower causes her to attempt seducing Clark. at the last moment, he refuses her but the damage has already been done. this episode causes the wrong impressions and isn't suitable for people under the age of twenty, due to it's adult content. the first part was good, the last part (focusing on the effect the flower has on Pete) was good, but the middle that was all about Lana's alternate personality, was most defiantly not, and that ruined what could have been a brilliant Episode. I give this Episode two.\"\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"sentiment\",\n      \"properties\": {\n        \"dtype\": \"category\",\n        \"num_unique_values\": 2,\n        \"samples\": [\n          \"positive\",\n          \"negative\"\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    }\n  ]\n}"
             }
           },
           "metadata": {},
-          "execution_count": 10
+          "execution_count": 20
         }
       ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Text Cleaning and Tokenization"
+      ],
+      "metadata": {
+        "id": "uXaphcm1KTSk"
+      }
     }
   ]
 }
